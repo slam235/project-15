@@ -4,12 +4,11 @@ const bodyParser = require('body-parser');
 const cardsRouter = require('./routes/cards');
 const usersRouter = require('./routes/users');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3000, MONGO_URI = 'mongodb://localhost:27017/mestodb' } = process.env;
 const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-const MONGO_URI = 'mongodb://localhost:27017/mestodb';
 
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
