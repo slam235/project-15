@@ -3,15 +3,13 @@ const User = require('../models/user');
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((user) => {
-      if (!avatar || !name || !about) {
-        res.status(400).send({ message: 'Имя, описание и ссылка на аватар должны быть заполнены!' });
-      } else {
-        res.status(200).send({ data: user });
-      }
-    })
-    .catch((err) => res.status(500).send({ message: `Internal Server Error - ${err}` }));
+  if (!avatar || !name || !about) {
+    res.status(400).send({ message: 'Имя, описание и ссылка на аватар должны быть заполнены!' });
+  } else {
+    User.create({ name, about, avatar })
+      .then((user) => res.status(200).send({ data: user }))
+      .catch((err) => res.status(500).send({ message: `Internal Server Error - ${err}` }));
+  }
 };
 
 module.exports.getUsers = (req, res) => {
@@ -21,40 +19,41 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.getSingleUser = (req, res) => {
-  User.findById(req.params.id)
-    .then((user) => {
-      if (!req.params.id) {
-        res.status(400).send({ message: 'Некорректный Id пользователя' });
-      } else {
-        res.status(200).send({ data: user });
-      }
-    })
-    .catch(() => res.status(404).send({ message: 'Нет пользователя с таким Id' }));
+  if (!req.params.id) {
+    res.status(400).send({ message: 'Некорректный Id пользователя' });
+  } else {
+    User.findById(req.params.id)
+      .then((user) => {
+        if (JSON.stringify(user._id) !== req.params.id) {
+          res.status(404).send({ message: 'Нет пользователя с таким Id' });
+        } else {
+          res.status(200).send({ data: user });
+        }
+      })
+      .catch((err) => res.status(500).send({ message: `Internal Server Error - ${err}` }));
+  }
 };
 
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user._id, { name, about },
-    { new: true, runValidators: true, upsert: true })
-    .then((user) => {
-      if (!req.user._id) {
-        res.status(403).send({ message: 'Не найден пользователь с таким Id' });
-      } else {
-        res.status(200).send({ data: user });
-      }
-    })
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка при обновлении профиля - ${err}` }));
+  if (!req.user._id) {
+    res.status(403).send({ message: 'Пользователь, выполняющий запрос, не авторизован!' });
+  } else {
+    User.findByIdAndUpdate(req.user._id, { name, about },
+      { new: true, runValidators: true, upsert: true })
+      .then((user) => res.status(200).send({ data: user }))
+      .catch((err) => res.status(500).send({ message: `Произошла ошибка при обновлении профиля - ${err}` }));
+  }
 };
 
 module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true, upsert: true })
-    .then((user) => {
-      if (!req.user._id) {
-        res.status(403).send({ message: 'Не найден пользователь с таким Id' });
-      } else {
-        res.status(200).send({ data: user });
-      }
-    })
-    .catch((err) => res.status(500).send({ message: `Произвошла ошибка при обновлении аватарки - ${err}` }));
+  if (!req.user._id) {
+    res.status(403).send({ message: 'Пользователь, выполняющий запрос, не авторизован!' });
+  } else {
+    User.findByIdAndUpdate(req.user._id, { avatar },
+      { new: true, runValidators: true, upsert: true })
+      .then((user) => res.status(200).send({ data: user }))
+      .catch((err) => res.status(500).send({ message: `Произошла ошибка при обновлении профиля - ${err}` }));
+  }
 };
