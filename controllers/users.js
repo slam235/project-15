@@ -8,7 +8,7 @@ module.exports.createUser = (req, res) => {
   } else {
     User.create({ name, about, avatar })
       .then((user) => res.status(200).send({ data: user }))
-      .catch((err) => res.status(500).send({ message: `Internal Server Error - ${err}` }));
+      .catch((err) => res.status(500).send({ message: err.message }));
   }
 };
 
@@ -24,13 +24,13 @@ module.exports.getSingleUser = (req, res) => {
   } else {
     User.findById(req.params.id)
       .then((user) => {
-        if (JSON.stringify(user._id) !== req.params.id) {
-          res.status(404).send({ message: 'Нет пользователя с таким Id' });
-        } else {
-          res.status(200).send({ data: user });
+        if (!user) {
+          res.status(404).send({ message: 'Пользователь не найден' }); return;
         }
+        if ((user._id).toString() !== req.params.id) return;
+        res.status(200).send({ data: user });
       })
-      .catch((err) => res.status(500).send({ message: `Internal Server Error - ${err}` }));
+      .catch((err) => res.status(500).send({ message: err.message }));
   }
 };
 

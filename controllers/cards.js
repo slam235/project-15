@@ -8,7 +8,7 @@ module.exports.createCard = (req, res) => {
   } else {
     Card.create({ name, link, owner })
       .then((card) => res.status(200).send({ data: card }))
-      .catch((err) => res.status(500).send({ message: `Internal Server Error - ${err}` }));
+      .catch((err) => res.status(500).send({ message: err.message }));
   }
 };
 
@@ -16,7 +16,7 @@ module.exports.getCards = (req, res) => {
   Card.find({})
     .populate('owner')
     .then((cards) => res.status(200).send({ data: cards }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка при поиске карточек' }));
+    .catch((err) => res.status(500).send({ message: err.message }));
 };
 
 module.exports.deleteCard = (req, res) => {
@@ -25,13 +25,13 @@ module.exports.deleteCard = (req, res) => {
   } else {
     Card.findByIdAndRemove(req.params.cardId)
       .then((card) => {
-        if (JSON.stringify(card._id) !== req.params.cardId) {
-          res.status(404).send({ message: 'Не найдена какрточка с таким Id' });
-        } else {
-          res.status(200).send({ data: card });
+        if (!card) {
+          res.status(404).send({ message: 'Карточка не найдена' }); return;
         }
+        if ((card._id).toString() !== req.params.cardId) return;
+        res.status(200).send({ data: card });
       })
-      .catch(() => res.status(500).send({ message: 'Произошла ошибка при лайке карточки' }));
+      .catch((err) => res.status(500).send({ message: err.message }));
   }
 };
 
@@ -41,13 +41,13 @@ module.exports.likeCard = (req, res) => {
   } else {
     Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
       .then((card) => {
-        if (JSON.stringify(card._id) !== req.params.cardId) {
-          res.status(404).send({ message: 'Не найдена какрточка с таким Id' });
-        } else {
-          res.status(200).send({ data: card });
+        if (!card) {
+          res.status(404).send({ message: 'card to like is not found' }); return;
         }
+        if ((card._id).toString() !== req.params.cardId) return;
+        res.status(200).send({ data: card });
       })
-      .catch(() => res.status(500).send({ message: 'Произошла ошибка при лайке карточки' }));
+      .catch((err) => res.status(500).send({ message: err.message }));
   }
 };
 
@@ -55,14 +55,14 @@ module.exports.dislikeCard = (req, res) => {
   if (!req.params.cardId) {
     res.status(400).send({ message: 'Некорректный Id' });
   } else {
-    Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+    Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
       .then((card) => {
-        if (JSON.stringify(card._id) !== req.params.cardId) {
-          res.status(404).send({ message: 'Не найдена какрточка с таким Id' });
-        } else {
-          res.status(200).send({ data: card });
+        if (!card) {
+          res.status(404).send({ message: 'card to dislike is not found' }); return;
         }
+        if ((card._id).toString() !== req.params.cardId) return;
+        res.status(200).send({ data: card });
       })
-      .catch(() => res.status(500).send({ message: 'Произошла ошибка при дизлайке карточки' }));
+      .catch((err) => res.status(500).send({ message: err.message }));
   }
 };
