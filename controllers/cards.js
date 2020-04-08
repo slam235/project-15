@@ -26,10 +26,13 @@ module.exports.deleteCard = (req, res) => {
     Card.findByIdAndRemove(req.params.cardId)
       .then((card) => {
         if (!card) {
-          res.status(404).send({ message: 'Карточка не найдена' }); return;
+          return res.status(404).send({ message: 'Карточка не найдена' });
         }
-        if ((card._id).toString() !== req.params.cardId) return;
-        res.status(200).send({ data: card });
+        if ((card.owner).toString() !== req.user._id) {
+          return Promise.reject(new Error('Карта не ваша! Удалить нельзя!'));
+        }
+        if ((card._id).toString() !== req.params.cardId) return '';
+        return res.status(200).send({ data: card });
       })
       .catch((err) => res.status(500).send({ message: err.message }));
   }
