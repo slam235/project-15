@@ -1,23 +1,18 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
 const User = require('../models/user');
-
-const { NODE_ENV, JWT_SECRET } = process.env;
+const { JWT_SECRET } = require('../config');
 
 module.exports.createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  if (!avatar || !name || !about || !email || !password) {
-    res.status(400).send({ message: 'Имя, описание и ссылка на аватар, email, пароль должны быть заполнены!' }); return;
-  }
-  bcrypt.hash(req.body.password, 10)
+  bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
     .then((user) => res.status(200).send({ data: user }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => res.status(409).send({ message: err.message }));
 };
 
 module.exports.login = (req, res) => {
@@ -26,7 +21,7 @@ module.exports.login = (req, res) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        JWT_SECRET,
         { expiresIn: '7d' },
       );
       res.cookie('jwt', token, {
@@ -49,19 +44,14 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.getSingleUser = (req, res) => {
-  if (!req.params.id) {
-    res.status(400).send({ message: 'Некорректный Id пользователя' });
-  } else {
-    User.findById(req.params.id)
-      .then((user) => {
-        if (!user) {
-          res.status(404).send({ message: 'Пользователь не найден' }); return;
-        }
-        if ((user._id).toString() !== req.params.id) return;
-        res.status(200).send({ data: user });
-      })
-      .catch((err) => res.status(500).send({ message: err.message }));
-  }
+  User.findById(req.params.id)
+    .then((user) => {
+      if (!user) {
+        res.status(404).send({ message: 'Пользователь не найден' }); return;
+      }
+      res.status(200).send({ data: user });
+    })
+    .catch((err) => res.status(500).send({ message: err.message }));
 };
 
 module.exports.updateUser = (req, res) => {
