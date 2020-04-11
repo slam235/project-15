@@ -7,8 +7,8 @@ const cardsRouter = require('./routes/cards');
 const usersRouter = require('./routes/users');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const { PORT, MONGO_URI } = require('./config');
 
-const { PORT = 3000, MONGO_URI = 'mongodb://localhost:27017/mestodb' } = process.env;
 const app = express();
 
 app.use(helmet());
