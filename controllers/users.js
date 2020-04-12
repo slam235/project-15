@@ -11,7 +11,7 @@ module.exports.createUser = (req, res) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => res.status(200).send({ data: user.omitPrivate() }))
     .catch((err) => res.status(409).send({ message: err.message }));
 };
 
