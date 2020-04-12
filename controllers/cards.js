@@ -18,8 +18,8 @@ module.exports.getCards = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   Card.findById(req.params.cardId)
     .then((card) => {
-      if (!card) return Promise.reject(new Error('Такой карты нет'));
-      if ((card.owner).toString() !== req.user._id) return Promise.reject(new Error('Карта не ваша! Удалить нельзя!'));
+      if (!card) return res.status(404).send({ message: 'Карточка не найдена' });
+      if ((card.owner).toString() !== req.user._id) return res.status(403).send({ message: 'Карта не ваша! Удалить нельзя!' });
       return Card.remove(card)
         .then((cardToDelete) => res.send(cardToDelete !== null ? { data: card } : { data: 'Нечего удалять' }))
         .catch((err) => res.status(500).send({ message: err.message }));
