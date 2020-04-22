@@ -4,25 +4,30 @@
   "description": "Подключени к базе MongoDB",
   "main": "app.js",
   "scripts": {
-    "dev": "nodemon app.js",
-    "start": "node app.js"
+    "dev": "NODE_ENV=development nodemon app.js",
+    "start": "NODE_ENV=production node app.js"
   },
   "author": "Alexey Shiryaev",
   "license": "ISC",
   "devDependencies": {
     "eslint": "^6.8.0",
-    "nodemon": "^2.0.2"
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.2",
+    "nodemon": "^2.0.3"
   },
   "dependencies": {
+    "@hapi/joi": "^17.1.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
+    "celebrate": "^12.1.0",
     "cookie-parser": "^1.4.5",
-    "eslint-config-airbnb-base": "^14.1.0",
-    "eslint-plugin-import": "^2.20.1",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "express-winston": "^4.0.3",
     "helmet": "^3.22.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.9.6",
-    "validator": "^13.0.0"
+    "mongoose": "^5.9.9",
+    "validator": "^13.0.0",
+    "winston": "^3.2.1"
   }
 }
