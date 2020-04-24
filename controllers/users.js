@@ -3,17 +3,22 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { JWT_SECRET } = require('../config');
 const NotFoundError = require('../errors/not-found-err');
-
+const ConflictError = require('../errors/conflict-err');
 
 module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  bcrypt.hash(password, 10)
-    .then((hash) => User.create({
-      name, about, avatar, email, password: hash,
-    }))
-    .then((user) => res.status(201).send({ data: user.omitPrivate() }))
+  User.findOne({ email })
+    .then((u) => {
+      if (u) throw new ConflictError('Такой имеил уже есть!');
+      bcrypt.hash(password, 10)
+        .then((hash) => User.create({
+          name, about, avatar, email, password: hash,
+        }))
+        .then((user) => res.status(201).send({ data: user.omitPrivate() }));
+      return '';
+    })
     .catch(next);
 };
 
@@ -42,11 +47,8 @@ module.exports.getUsers = (req, res, next) => {
 };
 
 module.exports.getSingleUser = (req, res, next) => {
-  User.findById(req.params.id)
+  User.findById(req.params.id).orFail(new NotFoundError('Пользователь не найден'))
     .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Пользователь не найден');
-      }
       res.send({ data: user });
     })
     .catch(next);
