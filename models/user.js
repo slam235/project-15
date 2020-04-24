@@ -20,8 +20,8 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     validate: {
-      validator: (v) => v.match(/^https?:\/\/(w{3}\.)?[\w-/.]{1,}/),
-      message: (props) => `${props.value} is not a valid URL!`,
+      validator: (v) => validator.isURL(v),
+      message: 'Укажите корректный URL!',
     },
     required: true,
   },
